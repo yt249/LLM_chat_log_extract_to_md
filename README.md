@@ -1,65 +1,56 @@
-# Claude Chat History Viewer
+# LLM Chat History Viewer (Codex + Claude)
 
-- **Course:** CMU 17-316
-- **Purpose:** A better way to view and submit Claude Code chat history in markdown format
+- Supports `.jsonl` chat logs from Codex (CLI/VS Code) and Claude Code
+- Two ways to use: a Python CLI extractor and a web-based viewer/converter
 
 ## Overview
 
-This repository contains my Claude Code chat history for CMU 17-316, along with a custom web-based markdown viewer. As the chat history grows longer, viewing it in a standard markdown viewer becomes increasingly difficult. This tool provides a better reading experience with syntax highlighting, table of contents, and smooth navigation.
+Convert LLM `.jsonl` chat logs into readable Markdown with timestamps and roles. Use the CLI to batch‑process folders into timestamped files, or the web UI to preview and download a single or combined Markdown file without installing anything.
 
 ## What's Inside
 
-- **`viewer.html`** - Modern static web page for visualizing markdown files with:
-  -  **Dark/Light mode toggle** - Switch between themes with saved preference
+- `viewer.html` — Web UI to load `.jsonl` or `.md`, render nicely, and download Markdown.
+- `extract_chat_log.py` — Python CLI extractor that handles both Codex and Claude `.jsonl` logs and writes Markdown to `generatedMD/`.
 
-- **`P4ClaudeChatHistory.md`** - Complete chat history from Claude Code sessions of P4 by Watson
+## Web UI
 
-- **`extract_chat_history.py`** - Python script used to extract chat history from Claude Code
+- Open `viewer.html` in your browser (no server needed).
+- Click “Choose File” and select one or more files:
+  - `.jsonl`: parsed, merged, sorted by timestamp, and rendered as Markdown.
+  - `.md/.markdown/.txt`: concatenated and rendered.
+- Click “Download .md” to save the rendered Markdown.
+- Extras: dark/light theme toggle, table of contents, syntax highlighting.
 
-## How to Use
+## CLI
 
-### Quick Start
+Requirements: Python 3.9+
 
-1. **Clone this repository**
-   ```bash
-   git clone https://github.com/chaowatson/claude_extract.git
-   cd claude_extract
-   ```
+- Single log file
+  - `python3 extract_chat_log.py --path /path/to/session.jsonl`
+- Entire date folder (recursive)
+  - `python3 extract_chat_log.py --path ~/.codex/sessions/2025/11/08 --pattern '*.jsonl'`
+- Customize output location/name
+  - `python3 extract_chat_log.py --path ~/.codex/sessions --outdir generatedMD --prefix ChatHistory`
 
-2. **Open the viewer**
-   ```bash
-   open viewer.html
-   ```
-   Or simply double-click `viewer.html` in your file browser
+Behavior
+- Writes to `generatedMD/<prefix>-YYYYmmdd-HHMMSS.md` (no overwrites; auto‑timestamped).
+- Handles both Codex and Claude schemas:
+  - Top‑level `user/assistant` or nested under `payload.message` (Codex `response_item`).
+  - Content items: `text`, `input_text`, `output_text`, `tool_use`, `tool_result`.
+  - Timestamps from `timestamp`, `payload.timestamp`, or similar keys.
+- Cleans noisy IDE context from user messages (e.g., `<environment_context>…</environment_context>`, “Active file:”, “Open tabs:” sections).
 
-3. **Load the chat history**
-   - Click the "Choose File" button
-   - Select the chat history you want to view
-   - Enjoy a beautifully formatted, easy-to-navigate view of the chat history!
+## Why
 
-4. **Customize your experience** (Optional)
-   - Click the theme toggle button (🌙/☀️) in the top-right corner to switch between dark and light modes
-   - Your preference will be saved for future visits
+- Long chat logs are hard to read in default viewers.
+- This tool provides a clean Markdown view with TOC and code highlighting, and a CLI for repeatable exports.
 
-## Why This Approach?
+## Tech Notes
 
-Claude Code chat histories can become quite lengthy, and traditional markdown viewers don't handle long documents well. This tool was created to:
+- Web UI uses Marked.js for Markdown and Highlight.js for code highlighting.
+- No frameworks or backend; everything runs locally in your browser.
 
-- Provide a better reading experience for graders/reviewers
-- Enable quick navigation through long conversations via table of contents
-- Ensure proper syntax highlighting for code snippets
-- Make the submission more professional and accessible
+## Tips
 
-## Technical Details
-
-The viewer uses:
-- [Marked.js](https://marked.js.org/) for markdown parsing
-- [Highlight.js](https://highlightjs.org/) for syntax highlighting with dual themes (Atom One Dark/Light)
-- CSS Variables for dynamic theming
-- LocalStorage API for theme persistence
-- Modern CSS (gradients, glassmorphism, animations)
-- Vanilla JavaScript (no frameworks needed)
-
----
-
-### **Note:** This is the best solution I've found for submitting Claude Code chat history while maintaining readability and usability. Feel free to use this approach for your own submissions!
+- For big batches, prefer the CLI with a folder path and glob pattern.
+- For quick spot‑checks or manual merges, use the web UI and multi‑select `.jsonl` files.

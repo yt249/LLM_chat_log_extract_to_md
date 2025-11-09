@@ -1,853 +1,1249 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Markdown Viewer - CMU 17-316</title>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css" id="highlight-dark">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css" id="highlight-light" disabled>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"
+      id="highlight-dark"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css"
+      id="highlight-light"
+      disabled
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        :root {
-            --bg-primary: #0a0e27;
-            --bg-secondary: #151932;
-            --bg-card: rgba(255, 255, 255, 0.03);
-            --bg-card-hover: rgba(255, 255, 255, 0.05);
-            --text-primary: #e4e6eb;
-            --text-secondary: #a0a3bd;
-            --text-muted: #6e7191;
-            --accent-primary: #6366f1;
-            --accent-secondary: #8b5cf6;
-            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --code-bg: #1e1e2e;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-            --gradient-1: rgba(99, 102, 241, 0.1);
-            --gradient-2: rgba(139, 92, 246, 0.1);
-        }
+      :root {
+        --bg-primary: #0a0e27;
+        --bg-secondary: #151932;
+        --bg-card: rgba(255, 255, 255, 0.03);
+        --bg-card-hover: rgba(255, 255, 255, 0.05);
+        --text-primary: #e4e6eb;
+        --text-secondary: #a0a3bd;
+        --text-muted: #6e7191;
+        --accent-primary: #6366f1;
+        --accent-secondary: #8b5cf6;
+        --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --border-color: rgba(255, 255, 255, 0.1);
+        --code-bg: #1e1e2e;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+        --gradient-1: rgba(99, 102, 241, 0.1);
+        --gradient-2: rgba(139, 92, 246, 0.1);
+      }
 
-        body.light-mode {
-            --bg-primary: #f8f9fa;
-            --bg-secondary: #ffffff;
-            --bg-card: rgba(0, 0, 0, 0.02);
-            --bg-card-hover: rgba(0, 0, 0, 0.04);
-            --text-primary: #1a1a1a;
-            --text-secondary: #4a5568;
-            --text-muted: #718096;
-            --accent-primary: #6366f1;
-            --accent-secondary: #8b5cf6;
-            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --border-color: rgba(0, 0, 0, 0.1);
-            --code-bg: #f6f8fa;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
-            --gradient-1: rgba(99, 102, 241, 0.05);
-            --gradient-2: rgba(139, 92, 246, 0.05);
-        }
+      body.light-mode {
+        --bg-primary: #f8f9fa;
+        --bg-secondary: #ffffff;
+        --bg-card: rgba(0, 0, 0, 0.02);
+        --bg-card-hover: rgba(0, 0, 0, 0.04);
+        --text-primary: #1a1a1a;
+        --text-secondary: #4a5568;
+        --text-muted: #718096;
+        --accent-primary: #6366f1;
+        --accent-secondary: #8b5cf6;
+        --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --border-color: rgba(0, 0, 0, 0.1);
+        --code-bg: #f6f8fa;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+        --gradient-1: rgba(99, 102, 241, 0.05);
+        --gradient-2: rgba(139, 92, 246, 0.05);
+      }
 
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            line-height: 1.7;
-            color: var(--text-primary);
-            background: var(--bg-primary);
-            background-image:
-                radial-gradient(at 0% 0%, var(--gradient-1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, var(--gradient-2) 0px, transparent 50%);
-            background-attachment: fixed;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+          system-ui, sans-serif;
+        line-height: 1.7;
+        color: var(--text-primary);
+        background: var(--bg-primary);
+        background-image: radial-gradient(
+            at 0% 0%,
+            var(--gradient-1) 0px,
+            transparent 50%
+          ),
+          radial-gradient(at 100% 100%, var(--gradient-2) 0px, transparent 50%);
+        background-attachment: fixed;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px 20px 80px;
-        }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px 80px;
+      }
 
-        /* Header Styles */
-        .header {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 32px;
-            margin-bottom: 40px;
-            box-shadow: var(--shadow-md);
-            animation: slideDown 0.6s ease-out;
-            position: relative;
-            z-index: 10;
-        }
+      /* Header Styles */
+      .header {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 40px;
+        box-shadow: var(--shadow-md);
+        animation: slideDown 0.6s ease-out;
+        position: relative;
+        z-index: 10;
+      }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
         }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
+      .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 24px;
+      }
+
+      .title-section {
+        flex: 1;
+        min-width: 250px;
+      }
+
+      .header h1 {
+        font-size: 36px;
+        font-weight: 700;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
+      .file-picker {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+      }
+
+      .file-input-wrapper input[type='file'] {
+        position: absolute;
+        left: -9999px;
+      }
+
+      .file-input-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        background: var(--accent-gradient);
+        color: white;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+        border: none;
+      }
+
+      .file-input-label:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .file-input-label:active {
+        transform: translateY(0);
+      }
+
+      .file-input-label::before {
+        content: '📄';
+        font-size: 18px;
+      }
+
+      .file-name {
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 500;
+        padding: 8px 16px;
+        background: var(--bg-card);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .file-name:empty::before {
+        content: 'No file selected';
+        color: var(--text-muted);
+      }
+
+      /* Theme Toggle */
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--bg-card);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        width: 52px;
+        height: 52px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+        z-index: 1000;
+        font-size: 24px;
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.1);
+        background: var(--bg-card-hover);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .theme-toggle:active {
+        transform: scale(0.95);
+      }
+
+      /* Content Styles */
+      #content {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 48px;
+        box-shadow: var(--shadow-md);
+        animation: fadeIn 0.8s ease-out;
+        position: relative;
+        z-index: 1;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      #content h1,
+      #content h2,
+      #content h3,
+      #content h4,
+      #content h5,
+      #content h6 {
+        color: var(--text-primary);
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+
+      #content h1 {
+        font-size: 2.5em;
+        padding-bottom: 0.4em;
+        border-bottom: 2px solid var(--border-color);
+        margin-top: 32px;
+        margin-bottom: 24px;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      #content h2 {
+        font-size: 2em;
+        padding-bottom: 0.3em;
+        border-bottom: 1px solid var(--border-color);
+        margin-top: 32px;
+        margin-bottom: 20px;
+      }
+
+      #content h3 {
+        font-size: 1.5em;
+        margin-top: 28px;
+        margin-bottom: 16px;
+      }
+
+      #content h4,
+      #content h5,
+      #content h6 {
+        margin-top: 24px;
+        margin-bottom: 12px;
+      }
+
+      #content p {
+        margin-bottom: 18px;
+        color: var(--text-secondary);
+        line-height: 1.8;
+      }
+
+      #content ul,
+      #content ol {
+        padding-left: 2em;
+        margin-bottom: 18px;
+        color: var(--text-secondary);
+      }
+
+      #content li {
+        margin-bottom: 10px;
+        line-height: 1.7;
+      }
+
+      #content pre {
+        background: var(--code-bg);
+        border-radius: 12px;
+        padding: 20px;
+        overflow-x: auto;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+      }
+
+      #content code {
+        background: var(--code-bg);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+        font-size: 0.9em;
+        color: #c792ea;
+        border: 1px solid var(--border-color);
+      }
+
+      #content pre code {
+        background: transparent;
+        padding: 0;
+        border: none;
+        font-size: 0.95em;
+        display: block;
+        color: inherit;
+      }
+
+      #content blockquote {
+        padding: 16px 20px;
+        color: var(--text-secondary);
+        border-left: 4px solid var(--accent-primary);
+        margin-bottom: 20px;
+        background: var(--bg-card);
+        border-radius: 0 8px 8px 0;
+        font-style: italic;
+      }
+
+      #content table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 24px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+      }
+
+      #content table th,
+      #content table td {
+        padding: 12px 16px;
+        border: 1px solid var(--border-color);
+      }
+
+      #content table th {
+        font-weight: 600;
+        background: var(--bg-card);
+        color: var(--text-primary);
+        text-align: left;
+      }
+
+      #content table tr {
+        background: var(--bg-secondary);
+      }
+
+      #content table tr:nth-child(2n) {
+        background: var(--bg-card);
+      }
+
+      #content table tr:hover {
+        background: var(--bg-card-hover);
+      }
+
+      #content a {
+        color: var(--accent-primary);
+        text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: all 0.2s ease;
+      }
+
+      #content a:hover {
+        color: var(--accent-secondary);
+        border-bottom-color: var(--accent-secondary);
+      }
+
+      #content hr {
+        height: 2px;
+        padding: 0;
+        margin: 32px 0;
+        background: var(--border-color);
+        border: 0;
+        border-radius: 2px;
+      }
+
+      #content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        margin: 20px 0;
+      }
+
+      /* Welcome Screen */
+      .welcome {
+        text-align: center;
+        padding: 100px 40px;
+        color: var(--text-secondary);
+        background: var(--bg-card);
+        border-radius: 16px;
+        border: 2px dashed var(--border-color);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          border-color: var(--border-color);
+        }
+        50% {
+          border-color: rgba(99, 102, 241, 0.3);
+        }
+      }
+
+      .welcome-icon {
+        font-size: 64px;
+        margin-bottom: 24px;
+        display: block;
+      }
+
+      .welcome h2 {
+        font-size: 28px;
+        margin-bottom: 16px;
+        background: var(--accent-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .welcome p {
+        font-size: 16px;
+        color: var(--text-secondary);
+      }
+
+      .error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px 0;
+        color: #fca5a5;
+      }
+
+      /* Table of Contents */
+      .toc {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 0;
+        margin-bottom: 32px;
+        max-height: 500px;
+        overflow-y: auto;
+        box-shadow: var(--shadow-md);
+        animation: slideDown 0.6s ease-out 0.2s both;
+        position: relative;
+        z-index: 10;
+        isolation: isolate;
+      }
+
+      .toc::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .toc::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+        border-radius: 4px;
+      }
+
+      .toc::-webkit-scrollbar-thumb {
+        background: var(--accent-primary);
+        border-radius: 4px;
+      }
+
+      .toc h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-primary);
+        position: sticky;
+        top: 0;
+        background: var(--bg-secondary);
+        padding: 28px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid var(--border-color);
+        z-index: 20;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .toc ul {
+        list-style: none;
+        padding: 0 28px 28px 28px;
+        margin: 0;
+      }
+
+      .toc ul ul {
+        padding-left: 20px;
+        padding-right: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin-top: 8px;
+      }
+
+      .toc li {
+        margin-bottom: 8px;
+      }
+
+      .toc a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        display: block;
+        padding: 6px 12px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-size: 14px;
+      }
+
+      .toc a:hover {
+        background: var(--bg-card-hover);
+        color: var(--accent-primary);
+        transform: translateX(4px);
+      }
+
+      /* Back to Top Button */
+      .back-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: var(--accent-gradient);
+        color: white;
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        text-decoration: none;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.3s ease;
+        z-index: 999;
+      }
+
+      .back-to-top:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
+      }
+
+      .back-to-top.show {
+        display: flex;
+        animation: bounceIn 0.4s ease-out;
+      }
+
+      @keyframes bounceIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
         .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 24px;
-        }
-
-        .title-section {
-            flex: 1;
-            min-width: 250px;
+          flex-direction: column;
+          align-items: flex-start;
         }
 
         .header h1 {
-            font-size: 36px;
-            font-weight: 700;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
+          font-size: 28px;
         }
 
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
+        #content {
+          padding: 32px 24px;
         }
 
         .file-picker {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-        }
-
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-input-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            background: var(--accent-gradient);
-            color: white;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-sm);
-            border: none;
-        }
-
-        .file-input-label:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .file-input-label:active {
-            transform: translateY(0);
-        }
-
-        .file-input-label::before {
-            content: "📄";
-            font-size: 18px;
+          width: 100%;
+          flex-direction: column;
+          align-items: stretch;
         }
 
         .file-name {
-            color: var(--text-secondary);
-            font-size: 14px;
-            font-weight: 500;
-            padding: 8px 16px;
-            background: var(--bg-card);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+          max-width: 100%;
         }
 
-        .file-name:empty::before {
-            content: "No file selected";
-            color: var(--text-muted);
-        }
-
-        /* Theme Toggle */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--bg-card);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 52px;
-            height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: var(--shadow-md);
-            z-index: 1000;
-            font-size: 24px;
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.1);
-            background: var(--bg-card-hover);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .theme-toggle:active {
-            transform: scale(0.95);
-        }
-
-        /* Content Styles */
-        #content {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 48px;
-            box-shadow: var(--shadow-md);
-            animation: fadeIn 0.8s ease-out;
-            position: relative;
-            z-index: 1;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        #content h1, #content h2, #content h3, #content h4, #content h5, #content h6 {
-            color: var(--text-primary);
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-
-        #content h1 {
-            font-size: 2.5em;
-            padding-bottom: 0.4em;
-            border-bottom: 2px solid var(--border-color);
-            margin-top: 32px;
-            margin-bottom: 24px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        #content h2 {
-            font-size: 2em;
-            padding-bottom: 0.3em;
-            border-bottom: 1px solid var(--border-color);
-            margin-top: 32px;
-            margin-bottom: 20px;
-        }
-
-        #content h3 {
-            font-size: 1.5em;
-            margin-top: 28px;
-            margin-bottom: 16px;
-        }
-
-        #content h4, #content h5, #content h6 {
-            margin-top: 24px;
-            margin-bottom: 12px;
-        }
-
-        #content p {
-            margin-bottom: 18px;
-            color: var(--text-secondary);
-            line-height: 1.8;
-        }
-
-        #content ul, #content ol {
-            padding-left: 2em;
-            margin-bottom: 18px;
-            color: var(--text-secondary);
-        }
-
-        #content li {
-            margin-bottom: 10px;
-            line-height: 1.7;
-        }
-
-        #content pre {
-            background: var(--code-bg);
-            border-radius: 12px;
-            padding: 20px;
-            overflow-x: auto;
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
-        }
-
-        #content code {
-            background: var(--code-bg);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-            font-size: 0.9em;
-            color: #c792ea;
-            border: 1px solid var(--border-color);
-        }
-
-        #content pre code {
-            background: transparent;
-            padding: 0;
-            border: none;
-            font-size: 0.95em;
-            display: block;
-            color: inherit;
-        }
-
-        #content blockquote {
-            padding: 16px 20px;
-            color: var(--text-secondary);
-            border-left: 4px solid var(--accent-primary);
-            margin-bottom: 20px;
-            background: var(--bg-card);
-            border-radius: 0 8px 8px 0;
-            font-style: italic;
-        }
-
-        #content table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 24px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--shadow-sm);
-        }
-
-        #content table th,
-        #content table td {
-            padding: 12px 16px;
-            border: 1px solid var(--border-color);
-        }
-
-        #content table th {
-            font-weight: 600;
-            background: var(--bg-card);
-            color: var(--text-primary);
-            text-align: left;
-        }
-
-        #content table tr {
-            background: var(--bg-secondary);
-        }
-
-        #content table tr:nth-child(2n) {
-            background: var(--bg-card);
-        }
-
-        #content table tr:hover {
-            background: var(--bg-card-hover);
-        }
-
-        #content a {
-            color: var(--accent-primary);
-            text-decoration: none;
-            border-bottom: 1px solid transparent;
-            transition: all 0.2s ease;
-        }
-
-        #content a:hover {
-            color: var(--accent-secondary);
-            border-bottom-color: var(--accent-secondary);
-        }
-
-        #content hr {
-            height: 2px;
-            padding: 0;
-            margin: 32px 0;
-            background: var(--border-color);
-            border: 0;
-            border-radius: 2px;
-        }
-
-        #content img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: var(--shadow-md);
-            margin: 20px 0;
-        }
-
-        /* Welcome Screen */
-        .welcome {
-            text-align: center;
-            padding: 100px 40px;
-            color: var(--text-secondary);
-            background: var(--bg-card);
-            border-radius: 16px;
-            border: 2px dashed var(--border-color);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                border-color: var(--border-color);
-            }
-            50% {
-                border-color: rgba(99, 102, 241, 0.3);
-            }
-        }
-
-        .welcome-icon {
-            font-size: 64px;
-            margin-bottom: 24px;
-            display: block;
-        }
-
-        .welcome h2 {
-            font-size: 28px;
-            margin-bottom: 16px;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .welcome p {
-            font-size: 16px;
-            color: var(--text-secondary);
-        }
-
-        .error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            color: #fca5a5;
-        }
-
-        /* Table of Contents */
         .toc {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 0;
-            margin-bottom: 32px;
-            max-height: 500px;
-            overflow-y: auto;
-            box-shadow: var(--shadow-md);
-            animation: slideDown 0.6s ease-out 0.2s both;
-            position: relative;
-            z-index: 10;
-            isolation: isolate;
+          max-height: 300px;
         }
+      }
 
-        .toc::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .toc::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-            border-radius: 4px;
-        }
-
-        .toc::-webkit-scrollbar-thumb {
-            background: var(--accent-primary);
-            border-radius: 4px;
-        }
-
-        .toc h3 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
-            position: sticky;
-            top: 0;
-            background: var(--bg-secondary);
-            padding: 28px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--border-color);
-            z-index: 20;
-            border-radius: 16px 16px 0 0;
-        }
-
-        .toc ul {
-            list-style: none;
-            padding: 0 28px 28px 28px;
-            margin: 0;
-        }
-
-        .toc ul ul {
-            padding-left: 20px;
-            padding-right: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            margin-top: 8px;
-        }
-
-        .toc li {
-            margin-bottom: 8px;
-        }
-
-        .toc a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            display: block;
-            padding: 6px 12px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            font-size: 14px;
-        }
-
-        .toc a:hover {
-            background: var(--bg-card-hover);
-            color: var(--accent-primary);
-            transform: translateX(4px);
-        }
-
-        /* Back to Top Button */
-        .back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: var(--accent-gradient);
-            color: white;
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            text-decoration: none;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: var(--shadow-lg);
-            transition: all 0.3s ease;
-            z-index: 999;
-        }
-
-        .back-to-top:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
-        }
-
-        .back-to-top.show {
-            display: flex;
-            animation: bounceIn 0.4s ease-out;
-        }
-
-        @keyframes bounceIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.3);
-            }
-            50% {
-                opacity: 1;
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .header h1 {
-                font-size: 28px;
-            }
-
-            #content {
-                padding: 32px 24px;
-            }
-
-            .file-picker {
-                width: 100%;
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .file-name {
-                max-width: 100%;
-            }
-
-            .toc {
-                max-height: 300px;
-            }
-        }
-
-        /* Scroll Progress Bar */
-        .progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 3px;
-            background: var(--accent-gradient);
-            width: 0%;
-            z-index: 1001;
-            transition: width 0.1s ease;
-        }
+      /* Scroll Progress Bar */
+      .progress-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        background: var(--accent-gradient);
+        width: 0%;
+        z-index: 1001;
+        transition: width 0.1s ease;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="progress-bar" id="progressBar"></div>
 
     <div class="theme-toggle" id="themeToggle" title="Toggle Theme"></div>
 
     <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <div class="title-section">
-                    <h1>Markdown Viewer</h1>
-                    <p class="subtitle">CMU 17-316 • CHAT HISTORY VIEWER</p>
-                </div>
-                <div class="file-picker">
-                    <div class="file-input-wrapper">
-                        <input type="file" id="fileInput" accept=".md,.markdown,.txt">
-                        <label for="fileInput" class="file-input-label">Choose File</label>
-                    </div>
-                    <span class="file-name" id="fileName"></span>
-                </div>
+      <div class="header">
+        <div class="header-content">
+          <div class="title-section">
+            <h1>Markdown Viewer</h1>
+            <p class="subtitle">CMU 17-316 • CHAT HISTORY VIEWER</p>
+          </div>
+          <div class="file-picker">
+            <div class="file-input-wrapper">
+              <input type="file" id="fileInput" accept=".jsonl" multiple />
+              <label for="fileInput" class="file-input-label"
+                >Choose File</label
+              >
             </div>
+            <button
+              id="downloadBtn"
+              class="file-input-label"
+              style="display: none"
+            >
+              Download .md
+            </button>
+            <span class="file-name" id="fileName"></span>
+          </div>
         </div>
+      </div>
 
-        <div id="toc-container"></div>
+      <div id="toc-container"></div>
 
-        <div id="content">
-            <div class="welcome">
-                <span class="welcome-icon">📝</span>
-                <h2>Welcome to Markdown Viewer</h2>
-                <p>Select a markdown file to view it with beautiful formatting and syntax highlighting</p>
-            </div>
+      <div id="content">
+        <div class="welcome">
+          <span class="welcome-icon">📝</span>
+          <h2>Welcome to Markdown Viewer</h2>
+          <p>
+            Select a markdown file to view it with beautiful formatting and
+            syntax highlighting
+          </p>
         </div>
+      </div>
     </div>
 
     <a href="#" class="back-to-top" id="backToTop">↑</a>
 
     <script>
-        // Configure marked
-        marked.setOptions({
-            highlight: function(code, lang) {
-                if (lang && hljs.getLanguage(lang)) {
-                    try {
-                        return hljs.highlight(code, { language: lang }).value;
-                    } catch (err) {}
-                }
-                return hljs.highlightAuto(code).value;
-            },
-            breaks: true,
-            gfm: true
-        });
-
-        // Generate table of contents
-        function generateTOC(markdown) {
-            const headings = [];
-            const lines = markdown.split('\n');
-
-            for (let line of lines) {
-                const match = line.match(/^(#{1,6})\s+(.+)$/);
-                if (match) {
-                    const level = match[1].length;
-                    const text = match[2].trim();
-                    const id = text.toLowerCase()
-                        .replace(/[^\w\s-]/g, '')
-                        .replace(/\s+/g, '-');
-                    headings.push({ level, text, id });
-                }
-            }
-
-            if (headings.length === 0) return '';
-
-            let tocHTML = '<div class="toc"><h3>📑 Table of Contents</h3><ul>';
-            let currentLevel = 1;
-
-            for (let heading of headings) {
-                while (currentLevel < heading.level) {
-                    tocHTML += '<ul>';
-                    currentLevel++;
-                }
-                while (currentLevel > heading.level) {
-                    tocHTML += '</ul>';
-                    currentLevel--;
-                }
-                tocHTML += `<li><a href="#${heading.id}">${heading.text}</a></li>`;
-            }
-
-            while (currentLevel > 1) {
-                tocHTML += '</ul>';
-                currentLevel--;
-            }
-
-            tocHTML += '</ul></div>';
-            return tocHTML;
-        }
-
-        // Add IDs to headings for TOC navigation
-        function addHeadingIds(html) {
-            return html.replace(/<h([1-6])>(.+?)<\/h\1>/g, (match, level, text) => {
-                const id = text.toLowerCase()
-                    .replace(/<[^>]*>/g, '')
-                    .replace(/[^\w\s-]/g, '')
-                    .replace(/\s+/g, '-');
-                return `<h${level} id="${id}">${text}</h${level}>`;
-            });
-        }
-
-        // Load and render markdown content
-        function renderMarkdown(markdown, filename) {
-            const contentDiv = document.getElementById('content');
-            const tocContainer = document.getElementById('toc-container');
-            const fileNameSpan = document.getElementById('fileName');
-
+      // Configure marked
+      marked.setOptions({
+        highlight: function (code, lang) {
+          if (lang && hljs.getLanguage(lang)) {
             try {
-                // Update filename display
-                fileNameSpan.textContent = filename;
+              return hljs.highlight(code, { language: lang }).value;
+            } catch (err) {}
+          }
+          return hljs.highlightAuto(code).value;
+        },
+        breaks: true,
+        gfm: true,
+      });
 
-                // Generate TOC
-                const tocHTML = generateTOC(markdown);
-                tocContainer.innerHTML = tocHTML;
+      // Generate table of contents
+      function generateTOC(markdown) {
+        const headings = [];
+        const lines = markdown.split('\n');
 
-                // Render markdown
-                let html = marked.parse(markdown);
-                html = addHeadingIds(html);
-                contentDiv.innerHTML = html;
-
-                // Highlight code blocks
-                document.querySelectorAll('pre code').forEach((block) => {
-                    hljs.highlightElement(block);
-                });
-
-                // Scroll to top
-                window.scrollTo(0, 0);
-
-            } catch (error) {
-                contentDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
-                console.error('Error rendering markdown:', error);
-            }
+        for (let line of lines) {
+          const match = line.match(/^(#{1,6})\s+(.+)$/);
+          if (match) {
+            const level = match[1].length;
+            const text = match[2].trim();
+            const id = text
+              .toLowerCase()
+              .replace(/[^\w\s-]/g, '')
+              .replace(/\s+/g, '-');
+            headings.push({ level, text, id });
+          }
         }
 
-        // File input handler
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+        if (headings.length === 0) return '';
 
-            const reader = new FileReader();
+        let tocHTML = '<div class="toc"><h3>📑 Table of Contents</h3><ul>';
+        let currentLevel = 1;
 
-            reader.onload = function(event) {
-                const markdown = event.target.result;
-                renderMarkdown(markdown, file.name);
-            };
+        for (let heading of headings) {
+          while (currentLevel < heading.level) {
+            tocHTML += '<ul>';
+            currentLevel++;
+          }
+          while (currentLevel > heading.level) {
+            tocHTML += '</ul>';
+            currentLevel--;
+          }
+          tocHTML += `<li><a href="#${heading.id}">${heading.text}</a></li>`;
+        }
 
-            reader.onerror = function(error) {
-                document.getElementById('content').innerHTML =
-                    `<div class="error"><strong>Error reading file:</strong> ${error}</div>`;
-            };
+        while (currentLevel > 1) {
+          tocHTML += '</ul>';
+          currentLevel--;
+        }
 
-            reader.readAsText(file);
+        tocHTML += '</ul></div>';
+        return tocHTML;
+      }
+
+      // Add IDs to headings for TOC navigation
+      function addHeadingIds(html) {
+        return html.replace(/<h([1-6])>(.+?)<\/h\1>/g, (match, level, text) => {
+          const id = text
+            .toLowerCase()
+            .replace(/<[^>]*>/g, '')
+            .replace(/[^\w\s-]/g, '')
+            .replace(/\s+/g, '-');
+          return `<h${level} id="${id}">${text}</h${level}>`;
         });
+      }
 
-        // Scroll Progress Bar
-        window.addEventListener('scroll', function() {
-            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrolled = (winScroll / height) * 100;
-            document.getElementById('progressBar').style.width = scrolled + '%';
-        });
+      let lastGeneratedMarkdown = '';
+      let lastDownloadName = '';
 
-        // Back to top button
-        const backToTop = document.getElementById('backToTop');
+      // Load and render markdown content
+      function renderMarkdown(markdown, filename) {
+        const contentDiv = document.getElementById('content');
+        const tocContainer = document.getElementById('toc-container');
+        const fileNameSpan = document.getElementById('fileName');
+        const downloadBtn = document.getElementById('downloadBtn');
 
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 300) {
-                backToTop.classList.add('show');
-            } else {
-                backToTop.classList.remove('show');
+        try {
+          // Update filename display
+          fileNameSpan.textContent = filename;
+
+          // Generate TOC
+          const tocHTML = generateTOC(markdown);
+          tocContainer.innerHTML = tocHTML;
+
+          // Render markdown
+          let html = marked.parse(markdown);
+          html = addHeadingIds(html);
+          contentDiv.innerHTML = html;
+
+          // Highlight code blocks
+          document.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+          });
+
+          // Scroll to top
+          window.scrollTo(0, 0);
+
+          // Enable download button
+          lastGeneratedMarkdown = markdown;
+          lastDownloadName =
+            (filename?.replace(/\.[^.]+$/, '') || 'ChatHistory') + '.md';
+          downloadBtn.style.display = 'inline-flex';
+        } catch (error) {
+          contentDiv.innerHTML = `<div class="error"><strong>Error:</strong> ${error.message}</div>`;
+          console.error('Error rendering markdown:', error);
+        }
+      }
+
+      function normalizeMessage(data, fileBasename) {
+        const payload =
+          data && typeof data.payload === 'object' ? data.payload : null;
+        const ts =
+          data.timestamp ||
+          payload?.timestamp ||
+          data.created_at ||
+          data.time ||
+          data.ts ||
+          null;
+        const messageObj =
+          data.message && typeof data.message === 'object'
+            ? data.message
+            : payload && typeof payload.message === 'object'
+            ? payload.message
+            : null;
+        let role =
+          messageObj?.role ||
+          payload?.role ||
+          data.role ||
+          data.type ||
+          data.source ||
+          null;
+        if (typeof role === 'string') {
+          const rl = role.toLowerCase();
+          if (rl.includes('assistant') || rl === 'model') role = 'assistant';
+          else if (rl.includes('user')) role = 'user';
+        }
+        if (!role || (role !== 'user' && role !== 'assistant')) return null;
+
+        let content = null;
+        if (messageObj && 'content' in messageObj) content = messageObj.content;
+        if (content == null && payload && 'content' in payload)
+          content = payload.content;
+        if (content == null) {
+          if ('content' in data) content = data.content;
+          else if ('text' in data) content = data.text;
+          else {
+            const delta = data.delta;
+            if (delta && typeof delta === 'object') {
+              if ('content' in delta) content = delta.content;
+              else if ('text' in delta) content = delta.text;
+            } else if (typeof delta === 'string') {
+              content = delta;
             }
-        });
+          }
+        }
 
-        backToTop.addEventListener('click', function(e) {
-            e.preventDefault();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        return {
+          timestamp: ts,
+          role: String(role).toLowerCase(),
+          content: content ?? '',
+          file: fileBasename,
+          message_id: data.uuid || data.id || '',
+          cwd: data.cwd || payload?.cwd || data.working_directory || '',
+          session_id:
+            data.sessionId || payload?.sessionId || data.session_id || '',
+        };
+      }
 
-        // Smooth scrolling for TOC links
-        document.addEventListener('click', function(e) {
-            if (e.target.matches('.toc a')) {
-                e.preventDefault();
-                const targetId = e.target.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      function formatTime(ts) {
+        if (!ts) return 'Unknown time';
+        try {
+          const d = new Date(ts);
+          if (isNaN(d.getTime())) return String(ts);
+          const pad = (n) => String(n).padStart(2, '0');
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+            d.getDate()
+          )} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(
+            d.getSeconds()
+          )}`;
+        } catch {
+          return String(ts);
+        }
+      }
+
+      function cleanUserText(text) {
+        if (!text) return text;
+        // Remove <environment_context>...</environment_context>
+        text = text.replace(
+          /<environment_context[\s\S]*?<\/environment_context>/gi,
+          ''
+        );
+        const lines = text.split(/\r?\n/);
+        const out = [];
+        let skipBullets = false;
+        for (const line of lines) {
+          if (/^\s*#\s*Context from my IDE setup:/i.test(line)) continue;
+          if (/^\s*##\s*Active file:\s*/i.test(line)) {
+            skipBullets = false;
+            continue;
+          }
+          if (/^\s*##\s*Open tabs:\s*/i.test(line)) {
+            skipBullets = true;
+            continue;
+          }
+          if (/^\s*-\s*Active file:\s*/i.test(line)) continue;
+          if (/^\s*-\s*Open tabs:\s*/i.test(line)) {
+            skipBullets = true;
+            continue;
+          }
+          if (skipBullets) {
+            if (/^\s*-\s+/.test(line)) continue;
+            else skipBullets = false;
+          }
+          out.push(line);
+        }
+        let cleaned = out.join('\n');
+        cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
+        return cleaned;
+      }
+
+      function renderContentBlocks(output, content, role = '') {
+        if (Array.isArray(content)) {
+          for (const item of content) {
+            if (item && typeof item === 'object') {
+              const t = item.type;
+              if (t === 'text' || t === 'input_text' || t === 'output_text') {
+                let text = item.text || '';
+                if (role === 'user') text = cleanUserText(text);
+                if (text) {
+                  output.push(text);
+                  output.push('');
                 }
+              } else if (t === 'tool_use') {
+                const tool = item.name || 'unknown';
+                const input = item.input || {};
+                output.push(`**Tool Use:** \`${tool}\``);
+                output.push('```json');
+                output.push(JSON.stringify(input, null, 2));
+                output.push('```');
+                output.push('');
+              } else if (t === 'tool_result') {
+                const id = item.tool_use_id || 'unknown';
+                const c = item.content || '';
+                output.push(`**Tool Result:** ${id}`);
+                if (typeof c === 'string') {
+                  output.push('```');
+                  output.push(c.length > 1000 ? c.slice(0, 1000) + '...' : c);
+                  output.push('```');
+                } else {
+                  output.push('```json');
+                  output.push(JSON.stringify(c, null, 2).slice(0, 1000));
+                  output.push('```');
+                }
+                output.push('');
+              }
+            } else if (typeof item === 'string') {
+              output.push(item);
+              output.push('');
             }
-        });
+          }
+        } else if (content && typeof content === 'object') {
+          output.push('```json');
+          output.push(JSON.stringify(content, null, 2).slice(0, 2000));
+          output.push('```');
+          output.push('');
+        } else if (typeof content === 'string' && content) {
+          let text = content;
+          if (role === 'user') text = cleanUserText(text);
+          if (text) {
+            output.push(text);
+            output.push('');
+          }
+        }
+      }
 
-        // Theme Toggle
-        const themeToggle = document.getElementById('themeToggle');
-        const body = document.body;
-        const highlightDark = document.getElementById('highlight-dark');
-        const highlightLight = document.getElementById('highlight-light');
-
-        // Check for saved theme preference or default to dark
-        const currentTheme = localStorage.getItem('theme') || 'dark';
-
-        function setTheme(theme) {
-            if (theme === 'light') {
-                body.classList.add('light-mode');
-                themeToggle.textContent = '☀️';
-                highlightDark.disabled = true;
-                highlightLight.disabled = false;
-                localStorage.setItem('theme', 'light');
+        function jsonlToMarkdown(fileName, text) {
+        const lines = text.split(/\r?\n/);
+        const msgs = [];
+        let total = 0,
+          skipped = 0;
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          total++;
+          try {
+            const data = JSON.parse(line);
+            const msg = normalizeMessage(data, fileName);
+            if (msg && (msg.role === 'user' || msg.role === 'assistant')) {
+              msgs.push(msg);
             } else {
-                body.classList.remove('light-mode');
-                themeToggle.textContent = '🌙';
-                highlightDark.disabled = false;
-                highlightLight.disabled = true;
-                localStorage.setItem('theme', 'dark');
+              skipped++;
             }
-
-            // Re-highlight all code blocks with new theme
-            document.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
+          } catch (e) {
+            skipped++;
+          }
         }
 
-        // Set initial theme
-        setTheme(currentTheme);
+        msgs.sort((a, b) =>
+          String(a.timestamp || '').localeCompare(String(b.timestamp || ''))
+        );
 
-        // Toggle theme on click
-        themeToggle.addEventListener('click', function() {
-            const newTheme = body.classList.contains('light-mode') ? 'dark' : 'light';
-            setTheme(newTheme);
+        const out = ['# Claude/Codex Chat History', ''];
+        let currentFile = null,
+          count = 0;
+        for (const m of msgs) {
+          const time = formatTime(m.timestamp);
+          if (currentFile !== m.file) {
+            currentFile = m.file;
+            out.push('\n---\n');
+            out.push(`\n## Conversation: ${m.file}\n`);
+            if (m.cwd) out.push(`**Working Directory:** \`${m.cwd}\`\n`);
+            if (m.session_id) out.push(`**Session ID:** \`${m.session_id}\`\n`);
+          }
+          out.push(`### [${time}] ${m.role.toUpperCase()}\n`);
+          renderContentBlocks(out, m.content, m.role);
+          count++;
+        }
+        out.push(`\n---\n\n*Total messages: ${count}*`);
+            return out.join('\n');
+        }
+
+        // Helpers for multi-file selection
+        function parseJsonlToMessages(fileName, text) {
+          const lines = text.split(/\r?\n/);
+          const msgs = [];
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            try {
+              const data = JSON.parse(line);
+              const msg = normalizeMessage(data, fileName);
+              if (msg && (msg.role === 'user' || msg.role === 'assistant')) {
+                msgs.push(msg);
+              }
+            } catch (e) {
+              /* skip malformed */
+            }
+          }
+          return msgs;
+        }
+
+        function messagesToMarkdown(msgs, title = '# Combined Chat History') {
+          msgs.sort((a, b) =>
+            String(a.timestamp || '').localeCompare(String(b.timestamp || ''))
+          );
+          const out = [title, ''];
+          let currentFile = null,
+            count = 0;
+          for (const m of msgs) {
+            const time = formatTime(m.timestamp);
+            if (currentFile !== m.file) {
+              currentFile = m.file;
+              out.push('\n---\n');
+              out.push(`\n## Conversation: ${m.file}\n`);
+              if (m.cwd) out.push(`**Working Directory:** \`${m.cwd}\`\n`);
+              if (m.session_id) out.push(`**Session ID:** \`${m.session_id}\`\n`);
+            }
+            out.push(`### [${time}] ${m.role.toUpperCase()}\n`);
+            renderContentBlocks(out, m.content, m.role);
+            count++;
+          }
+          out.push(`\n---\n\n*Total messages: ${count}*`);
+          return out.join('\n');
+        }
+
+      // File input handler
+      document
+        .getElementById('fileInput')
+        .addEventListener('change', function (e) {
+          const files = Array.from(e.target.files || []);
+          if (!files.length) return;
+          if (files.length > 1) {
+            const jsonlFiles = files.filter((f) => /\.jsonl$/i.test(f.name));
+            const mdFiles = files.filter((f) => /\.(md|markdown|txt)$/i.test(f.name));
+            const readAll = (fileList) =>
+              Promise.all(
+                fileList.map(
+                  (f) =>
+                    new Promise((resolve, reject) => {
+                      const r = new FileReader();
+                      r.onload = () =>
+                        resolve({ name: f.name, text: String(r.result || '') });
+                      r.onerror = reject;
+                      r.readAsText(f);
+                    })
+                )
+              );
+            if (jsonlFiles.length) {
+              readAll(jsonlFiles)
+                .then((items) => {
+                  let allMsgs = [];
+                  for (const it of items) {
+                    allMsgs = allMsgs.concat(
+                      parseJsonlToMessages(it.name, it.text)
+                    );
+                  }
+                  const md = messagesToMarkdown(
+                    allMsgs,
+                    '# Combined Chat History'
+                  );
+                  renderMarkdown(md, `Combined-${jsonlFiles.length}-files.md`);
+                })
+                .catch((error) => {
+                  document.getElementById(
+                    'content'
+                  ).innerHTML = `<div class=\"error\"><strong>Error reading files:</strong> ${error}</div>`;
+                });
+            } else if (mdFiles.length) {
+              readAll(mdFiles)
+                .then((items) => {
+                  const parts = [];
+                  for (const it of items) {
+                    parts.push(`\n---\n\n# ${it.name}`);
+                    parts.push(it.text);
+                  }
+                  const combined = parts.join('\n');
+                  renderMarkdown(
+                    combined,
+                    `Combined-${mdFiles.length}-markdown.md`
+                  );
+                })
+                .catch((error) => {
+                  document.getElementById(
+                    'content'
+                  ).innerHTML = `<div class=\"error\"><strong>Error reading files:</strong> ${error}</div>`;
+                });
+            }
+            return;
+          }
+
+          const file = files[0];
+          const reader = new FileReader();
+          const ext = (file.name.split('.').pop() || '').toLowerCase();
+
+          reader.onload = function (event) {
+            const text = event.target.result;
+            if (ext === 'jsonl') {
+              const md = jsonlToMarkdown(file.name, text);
+              renderMarkdown(md, file.name.replace(/\.jsonl$/i, '.md'));
+            } else {
+              renderMarkdown(text, file.name);
+            }
+          };
+
+          reader.onerror = function (error) {
+            document.getElementById(
+              'content'
+            ).innerHTML = `<div class="error"><strong>Error reading file:</strong> ${error}</div>`;
+          };
+
+          reader.readAsText(file);
         });
+
+      // Download button handler
+      document
+        .getElementById('downloadBtn')
+        .addEventListener('click', function () {
+          if (!lastGeneratedMarkdown) return;
+          const blob = new Blob([lastGeneratedMarkdown], {
+            type: 'text/markdown;charset=utf-8',
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = lastDownloadName || 'ChatHistory.md';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        });
+
+      // Scroll Progress Bar
+      window.addEventListener('scroll', function () {
+        const winScroll =
+          document.body.scrollTop || document.documentElement.scrollTop;
+        const height =
+          document.documentElement.scrollHeight -
+          document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.getElementById('progressBar').style.width = scrolled + '%';
+      });
+
+      // Back to top button
+      const backToTop = document.getElementById('backToTop');
+
+      window.addEventListener('scroll', function () {
+        if (window.pageYOffset > 300) {
+          backToTop.classList.add('show');
+        } else {
+          backToTop.classList.remove('show');
+        }
+      });
+
+      backToTop.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      // Smooth scrolling for TOC links
+      document.addEventListener('click', function (e) {
+        if (e.target.matches('.toc a')) {
+          e.preventDefault();
+          const targetId = e.target.getAttribute('href').substring(1);
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            targetElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start',
+            });
+          }
+        }
+      });
+
+      // Theme Toggle
+      const themeToggle = document.getElementById('themeToggle');
+      const body = document.body;
+      const highlightDark = document.getElementById('highlight-dark');
+      const highlightLight = document.getElementById('highlight-light');
+
+      // Check for saved theme preference or default to dark
+      const currentTheme = localStorage.getItem('theme') || 'dark';
+
+      function setTheme(theme) {
+        if (theme === 'light') {
+          body.classList.add('light-mode');
+          themeToggle.textContent = '☀️';
+          highlightDark.disabled = true;
+          highlightLight.disabled = false;
+          localStorage.setItem('theme', 'light');
+        } else {
+          body.classList.remove('light-mode');
+          themeToggle.textContent = '🌙';
+          highlightDark.disabled = false;
+          highlightLight.disabled = true;
+          localStorage.setItem('theme', 'dark');
+        }
+
+        // Re-highlight all code blocks with new theme
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightElement(block);
+        });
+      }
+
+      // Set initial theme
+      setTheme(currentTheme);
+
+      // Toggle theme on click
+      themeToggle.addEventListener('click', function () {
+        const newTheme = body.classList.contains('light-mode')
+          ? 'dark'
+          : 'light';
+        setTheme(newTheme);
+      });
     </script>
-</body>
+  </body>
 </html>
